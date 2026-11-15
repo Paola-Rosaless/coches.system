@@ -79,8 +79,14 @@ class App:
         self.id.focus() #hace que entre en la barra 
         self.id.pack(pady=5)
 
-        #REGRESAR Y GUARDAR
-        Button(self.ventana,text="Eliminar",command=self.eliminar_controller).pack(pady=10)
+        #RESULTADO DE LA BUSQUEDA
+        self.resultado_busqueda=Label(self.ventana,text="")
+        self.resultado_busqueda.pack(pady=5)
+
+        #BUSCAR, ELIMINAR Y REGRESAR
+        Button(self.ventana,text="Buscar",command=self.buscar_controller).pack(pady=10)
+        self.btn_eliminar=Button(self.ventana,text="Eliminar",state="disabled",command=self.eliminar_controller)
+        self.btn_eliminar.pack(pady=10)
         Button(self.ventana,text="Regresar",command=self.menu_acciones_view).pack(pady=10)
        
     def modificar_view(self):
@@ -150,15 +156,22 @@ class App:
         self.insertar_view()
 
   
-    def eliminar_controller(self):
-        #que exista el id que se quiere eliminar
-        #que pregunte antes de borrar si esta seguro de eliminar el registro, si o no 
-        #decible , onlyread
-        #validaciones, el rango que podemos ingresar 
-        #habilitar ciertos campos 
-        #que busque el registro y si existe que lo muestre en pantalla y que pregunte si desea eliminarlo
-
+    def buscar_controller(self):
         id = self.id.get()
+        registros = cochesBD.cochesBD.buscar(id)
+        if len(registros) > 0:
+            coche = registros[0]
+            self.resultado_busqueda.config(text=f"ID: {coche[0]}  Marca: {coche[1]}  Color: {coche[2]}  Modelo: {coche[3]}  Velocidad: {coche[4]}  Potencia: {coche[5]}  Asientos: {coche[6]}")
+            self.btn_eliminar.config(state="normal")
+        else:
+            self.resultado_busqueda.config(text="... ¡No se encontro un coche con ese ID ...!")
+            self.btn_eliminar.config(state="disabled")
+
+    def eliminar_controller(self):
+        id = self.id.get()
+        confirmacion = messagebox.askyesno(title="... Confirmar eliminacion ...", message=f"¿Deseas eliminar el coche con ID {id}?")
+        if not confirmacion:
+            return
         respuesta = cochesBD.cochesBD.eliminar(id)
         self.respuesta_sql(respuesta)
         self.eliminar_view()
